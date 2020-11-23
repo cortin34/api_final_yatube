@@ -505,4 +505,4 @@ components:
       properties:
         title:
           type: string
-          title: название группы
+          title: На кого подписаться

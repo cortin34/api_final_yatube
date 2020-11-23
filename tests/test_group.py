@@ -1,4 +1,5 @@
 import pytest
+
 from api.models import Group
 
 
@@ -63,7 +64,7 @@ class TestGroupAPI:
 
     @pytest.mark.django_db(transaction=True)
     def test_group_get_post(self, user_client, post, post_2, another_post, group_1, group_2):
-        response = user_client.get(f'/api/v1/posts/')
+        response = user_client.get('/api/v1/posts/')
         assert response.status_code == 200, \
             'Страница `/api/v1/posts/` не найдена, проверьте этот адрес в *urls.py*'
         test_data = response.json()
