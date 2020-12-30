@@ -21,7 +21,7 @@ class TestGroupAPI:
     def test_group_get(self, user_client, post, another_post, group_1, group_2):
         response = user_client.get('/api/v1/group/')
         assert response.status_code == 200, \
-            'Проверьте, что при GET запросе `/api/v1/group/` с токеном авторизации возвращаетсся статус 200'
+            'Проверьте, что при GET запросе `/api/v1/group/` с токеном авторизации возвращается статус 200'
 
         test_data = response.json()
 
@@ -30,13 +30,13 @@ class TestGroupAPI:
         assert len(test_data) == Group.objects.count(), \
             'Проверьте, что при GET запросе на `/api/v1/group/` возвращается весь список групп'
 
-        group = Group.objects.all()[0]
+        groups_cnt = Group.objects.count()
         test_group = test_data[0]
-        assert 'id' in test_group, 'Проверьте, что добавили `id` в список полей `fields` сериализатора модели Group'
+
         assert 'title' in test_group, \
             'Проверьте, что добавили `title` в список полей `fields` сериализатора модели Group'
 
-        assert test_group['id'] == group.id, \
+        assert len(test_data) == groups_cnt, \
             'Проверьте, что при GET запросе на `/api/v1/group/` возвращается весь список групп'
 
     @pytest.mark.django_db(transaction=True)
