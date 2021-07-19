@@ -1,6 +1,6 @@
 import pytest
 
-from api.models import Follow
+from posts.models import Follow
 
 
 class TestFollowAPI:
@@ -42,11 +42,11 @@ class TestFollowAPI:
             'Проверьте, что при GET запросе на `/api/v1/follow/` возвращается список'
         )
 
-        assert len(test_data) == Follow.objects.filter(following__username='TestUser').count(), (
+        assert len(test_data) == Follow.objects.filter(following__username=user.username).count(), (
             'Проверьте, что при GET запросе на `/api/v1/follow/` возвращается список всех подписчиков пользователя'
         )
 
-        follow = Follow.objects.filter(following__username=user.username)[0]
+        follow = Follow.objects.filter(user=user)[0]
         test_group = test_data[0]
         assert 'user' in test_group, (
             'Проверьте, что добавили `user` в список полей `fields` сериализатора модели Follow'
@@ -107,10 +107,11 @@ class TestFollowAPI:
         )
 
     @pytest.mark.django_db(transaction=True)
-    def test_follow_search_filter(self, user_client, follow_1, follow_2, follow_3, follow_4,
+    def test_follow_search_filter(self, user_client, follow_1, follow_2,
+                                  follow_3, follow_4, follow_5,
                                   user, user_2, another_user):
 
-        follow_user = Follow.objects.filter(following=user)
+        follow_user = Follow.objects.filter(user=user)
         follow_user_cnt = follow_user.count()
 
         response = user_client.get('/api/v1/follow/')
@@ -123,17 +124,17 @@ class TestFollowAPI:
 
         test_data = response.json()
         assert len(test_data) == follow_user_cnt, (
-            'Проверьте, что при GET запросе на `/api/v1/follow/` возвращается список всех подписчиков пользователя'
+            'Проверьте, что при GET запросе на `/api/v1/follow/` возвращается список всех подписок пользователя'
         )
 
         response = user_client.get(f'/api/v1/follow/?search={user_2.username}')
-        assert len(response.json()) == follow_user.filter(user=user_2).count(), (
+        assert len(response.json()) == follow_user.filter(following=user_2).count(), (
             'Проверьте, что при GET запросе с параметром `search` на `/api/v1/follow/` '
-            'возвращается список соответствующих подписчиков'
+            'возвращается результат поиска по подписке'
         )
 
         response = user_client.get(f'/api/v1/follow/?search={another_user.username}')
-        assert len(response.json()) == follow_user.filter(user=another_user).count(), (
+        assert len(response.json()) == follow_user.filter(following=another_user).count(), (
             'Проверьте, что при GET запросе с параметром `search` на `/api/v1/follow/` '
-            'возвращается список соответствующих подписчиков'
+            'возвращается результат поиска по подписке'
         )
