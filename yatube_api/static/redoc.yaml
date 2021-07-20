@@ -46,6 +46,27 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Post'
+              examples:
+                Без пагинации:
+                  value:
+                    - id: 0
+                      author: string
+                      text: string
+                      pub_date: '2019-08-24T14:15:22Z'
+                      image: string
+                      group: 0
+                С пагинацией:
+                  value:
+                    count: 123
+                    next: 'http://api.example.org/accounts/?offset=400&limit=100'
+                    previous: 'http://api.example.org/accounts/?offset=200&limit=100'
+                    results:
+                      - id: 0
+                        author: string
+                        text: string
+                        pub_date: '2019-08-24T14:15:22Z'
+                        image: string
+                        group: 0
           description: Удачное выполнение запроса
       tags:
         - api
@@ -872,7 +893,7 @@ components:
           format: binary
           nullable: true
         group:
-          type: integer 
+          type: integer
           nullable: true
       required:
         - text
