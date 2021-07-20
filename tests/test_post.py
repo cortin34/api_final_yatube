@@ -61,7 +61,7 @@ class TestPostAPI:
         )
 
     @pytest.mark.django_db(transaction=True)
-    def test_post_create(self, user_client, user, another_user):
+    def test_post_create(self, user_client, user, another_user, group_1):
         post_count = Post.objects.count()
 
         data = {}
@@ -70,14 +70,32 @@ class TestPostAPI:
             'Проверьте, что при POST запросе на `/api/v1/posts/` с не правильными данными возвращается статус 400'
         )
 
-        data = {'author': another_user.id, 'text': 'Статья номер 3'}
+        data = {'text': 'Статья номер 3'}
         response = user_client.post('/api/v1/posts/', data=data)
         assert response.status_code == 201, (
             'Проверьте, что при POST запросе на `/api/v1/posts/` с правильными данными возвращается статус 201'
         )
+        assert (
+                response.json().get('author') is not None
+                and response.json().get('author') == user.username
+        ), (
+            'Проверьте, что при POST запросе на `/api/v1/posts/` автором указывается пользователь,'
+            'от имени которого сделан запрос'
+        )
+
+        # post with group
+        data = {'text': 'Статья номер 4', 'group': group_1.id}
+        response = user_client.post('/api/v1/posts/', data=data)
+        assert response.status_code == 201, (
+            'Проверьте, что при POST запросе на `/api/v1/posts/`'
+            ' можно создать статью с сообществом и возвращается статус 201'
+        )
+        assert response.json().get('group') == group_1.id, (
+            'Проверьте, что при POST запросе на `/api/v1/posts/`'
+            ' создается публикация с указанием сообщества'
+        )
 
         test_data = response.json()
-
         msg_error = (
             'Проверьте, что при POST запросе на `/api/v1/posts/` возвращается словарь с данными новой статьи'
         )
@@ -87,7 +105,7 @@ class TestPostAPI:
         assert test_data.get('author') == user.username, (
             'Проверьте, что при POST запросе на `/api/v1/posts/` создается статья от авторизованного пользователя'
         )
-        assert post_count + 1 == Post.objects.count(), (
+        assert post_count + 2 == Post.objects.count(), (
             'Проверьте, что при POST запросе на `/api/v1/posts/` создается статья'
         )
 
