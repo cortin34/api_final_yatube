@@ -14,10 +14,17 @@ class TestGroupAPI:
         )
 
     @pytest.mark.django_db(transaction=True)
-    def test_group_not_auth(self, client, post, group_1):
+    def test_group_list_not_auth(self, client, post, group_1):
         response = client.get('/api/v1/groups/')
         assert response.status_code == 200, (
             'Проверьте, что `/api/v1/groups/` при запросе без токена возвращаете статус 200'
+        )
+
+    @pytest.mark.django_db(transaction=True)
+    def test_group_single_not_auth(self, client, group_1):
+        response = client.get(f'/api/v1/groups/{group_1.id}/')
+        assert response.status_code == 200, (
+            'Проверьте, что `/api/v1/groups/{group.id}/` при запросе без токена возвращаете статус 200'
         )
 
     @pytest.mark.django_db(transaction=True)
