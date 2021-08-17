@@ -14,11 +14,19 @@ class TestPostAPI:
         )
 
     @pytest.mark.django_db(transaction=True)
-    def test_post_not_auth(self, client, post):
+    def test_post_list_not_auth(self, client, post):
         response = client.get('/api/v1/posts/')
 
         assert response.status_code == 200, (
-            'Проверьте, что `/api/v1/posts/` при запросе без токена возвращаете статус 200'
+            'Проверьте, что на `/api/v1/posts/` при запросе без токена возвращаете статус 200'
+        )
+
+    @pytest.mark.django_db(transaction=True)
+    def test_post_single_not_auth(self, client, post):
+        response = client.get(f'/api/v1/posts/{post.id}/')
+
+        assert response.status_code == 200, (
+            'Проверьте, что на `/api/v1/posts/{post.id}/` при запросе без токена возвращаете статус 200'
         )
 
     @pytest.mark.django_db(transaction=True)
