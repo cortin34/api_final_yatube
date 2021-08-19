@@ -20,7 +20,6 @@ class Migration(migrations.Migration):
                 ('pub_date', models.DateTimeField(auto_now_add=True, verbose_name='Дата публикации')),
                 ('image', models.ImageField(blank=True, null=True, upload_to='posts/')),
                 ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='posts', to=settings.AUTH_USER_MODEL)),
-                ('group', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='posts', to='posts.group')),
             ],
         ),
         migrations.CreateModel(
