@@ -46,27 +46,6 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Post'
-              examples:
-                Без пагинации:
-                  value:
-                    - id: 0
-                      author: string
-                      text: string
-                      pub_date: '2019-08-24T14:15:22Z'
-                      image: string
-                      group: 0
-                С пагинацией:
-                  value:
-                    count: 123
-                    next: 'http://api.example.org/accounts/?offset=400&limit=100'
-                    previous: 'http://api.example.org/accounts/?offset=200&limit=100'
-                    results:
-                      - id: 0
-                        author: string
-                        text: string
-                        pub_date: '2019-08-24T14:15:22Z'
-                        image: string
-                        group: 0
           description: Удачное выполнение запроса
       tags:
         - api
@@ -723,7 +702,7 @@ paths:
                 Пользователь не существует:
                   value:
                     following:
-                      - Пользователь с username=... не существует.
+                      - Объект с username=... не существует.
                 Подписка на себя:
                   value:
                     following:
@@ -758,11 +737,11 @@ paths:
             schema:
               $ref: '#/components/schemas/TokenObtainPair'
       responses:
-        '201':
+        '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TokenObtainPair'
+                $ref: '#/components/schemas/Token'
           description: Удачное выполнение запроса
         '400':
           content:
@@ -802,11 +781,11 @@ paths:
             schema:
               $ref: '#/components/schemas/TokenRefresh'
       responses:
-        '201':
+        '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TokenRefresh'
+                $ref: '#/components/schemas/TokenRefresh2'
           description: Удачное выполнение запроса
         '400':
           content:
@@ -845,11 +824,7 @@ paths:
             schema:
               $ref: '#/components/schemas/TokenVerify'
       responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TokenVerify'
+        '200':
           description: Удачное выполнение запроса
         '400':
           content:
@@ -877,13 +852,13 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: integer (id публикации)
           readOnly: true
         author:
-          type: string
+          type: string (username пользователя)
           readOnly: true
         text:
-          type: string
+          type: string (текст публикации)
         pub_date:
           type: string
           format: date-time
@@ -893,7 +868,7 @@ components:
           format: binary
           nullable: true
         group:
-          type: integer
+          type: integer (id сообщества)
           nullable: true
       required:
         - text
@@ -901,19 +876,19 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: integer (id комментария)
           readOnly: true
         author:
-          type: string
+          type: string (username пользователя)
           readOnly: true
         text:
-          type: string
+          type: string (текст комментария)
         created:
           type: string
           format: date-time
           readOnly: true
         post:
-          type: integer
+          type: integer (id публикации)
           readOnly: true
       required:
         - text
@@ -940,10 +915,10 @@ components:
       type: object
       properties:
         user:
-          type: string
+          type: string (username владелец токена)
           readOnly: true
         following:
-          type: string
+          type: string (username)
       required:
         - following
     TokenObtainPair:
@@ -957,6 +932,16 @@ components:
       required:
         - username
         - password
+    Token:
+      title: Токен
+      type: object
+      properties:
+        refresh:
+          type: string
+          title: refresh токен
+        access:
+          type: string
+          title: access токен
     TokenRefresh:
       type: object
       properties:
@@ -974,3 +959,8 @@ components:
           type: string
       required:
         - token
+    TokenRefresh2:
+      type: object
+      properties:
+        access:
+          type: string
