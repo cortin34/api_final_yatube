@@ -30,20 +30,21 @@ class TestPostAPI:
         )
 
     @pytest.mark.django_db(transaction=True)
-    def test_posts_get(self, user_client, post, another_post):
+    def test_posts_get_not_paginated(self, user_client, post, another_post):
         response = user_client.get('/api/v1/posts/')
         assert response.status_code == 200, (
-            'Проверьте, что при GET запросе `/api/v1/posts/` с токеном авторизации возвращаетсся статус 200'
+            'Проверьте, что при GET запросе `/api/v1/posts/` с токеном авторизации возвращается статус 200'
         )
 
         test_data = response.json()
 
+        # response without pagination must be a list type
         assert type(test_data) == list, (
-            'Проверьте, что при GET запросе на `/api/v1/posts/` возвращается список'
+            'Проверьте, что при GET запросе на `/api/v1/posts/` без пагинации, возвращается список'
         )
 
         assert len(test_data) == Post.objects.count(), (
-            'Проверьте, что при GET запросе на `/api/v1/posts/` возвращается весь список статей'
+            'Проверьте, что при GET запросе на `/api/v1/posts/` без пагинации возвращается весь список статей'
         )
 
         post = Post.objects.all()[0]
@@ -66,6 +67,56 @@ class TestPostAPI:
 
         assert test_post['id'] == post.id, (
             'Проверьте, что при GET запросе на `/api/v1/posts/` возвращается весь список статей'
+        )
+
+    @pytest.mark.django_db(transaction=True)
+    def test_posts_get_paginated(self, user_client, post, post_2, another_post):
+        base_url = '/api/v1/posts/'
+        limit = 2
+        offset = 2
+        url = f'{base_url}?limit={limit}&offset={offset}'
+        response = user_client.get(url)
+        assert response.status_code == 200, (
+            f'Проверьте, что при GET запросе `{url}` с токеном авторизации возвращается статус 200'
+        )
+
+        test_data = response.json()
+
+        # response with pagination must be a dict type
+        assert type(test_data) == dict, (
+            f'Проверьте, что при GET запросе на `{url}` с пагинацией, возвращается словарь'
+        )
+        assert "results" in test_data.keys(), (
+            f'Убедитесь, что при GET запросе на `{url}` с пагинацией, ключ `results` присутствует в ответе'
+        )
+        assert len(test_data.get('results')) == Post.objects.count() - offset, (
+            f'Проверьте, что при GET запросе на `{url}` с пагинацией, возвращается корректное количество статей'
+        )
+        assert test_data.get('results')[0].get('text') == another_post.text, (
+            f'Убедитесь, что при GET запросе на `{url}` с пагинацией, '
+            'в ответе содержатся корректные статьи'
+        )
+
+        post = Post.objects.get(text=another_post.text)
+        test_post = test_data.get('results')[0]
+        assert 'id' in test_post, (
+            'Проверьте, что добавили `id` в список полей `fields` сериализатора модели Post'
+        )
+        assert 'text' in test_post, (
+            'Проверьте, что добавили `text` в список полей `fields` сериализатора модели Post'
+        )
+        assert 'author' in test_post, (
+            'Проверьте, что добавили `author` в список полей `fields` сериализатора модели Post'
+        )
+        assert 'pub_date' in test_post, (
+            'Проверьте, что добавили `pub_date` в список полей `fields` сериализатора модели Post'
+        )
+        assert test_post['author'] == post.author.username, (
+            'Проверьте, что `author` сериализатора модели Post возвращает имя пользователя'
+        )
+
+        assert test_post['id'] == post.id, (
+            f'Проверьте, что при GET запросе на `{url}` возвращается корректный список статей'
         )
 
     @pytest.mark.django_db(transaction=True)
