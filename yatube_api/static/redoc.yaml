@@ -27,26 +27,24 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  count:
-                    type: integer
-                    example: 123
-                  next:
-                    type: string
-                    nullable: true
-                    format: uri
-                    example: 'http://api.example.org/accounts/?offset=400&limit=100'
-                  previous:
-                    type: string
-                    nullable: true
-                    format: uri
-                    example: 'http://api.example.org/accounts/?offset=200&limit=100'
-                  results:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Post'
-          description: Удачное выполнение запроса
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetPost'
+              examples:
+                Ответ с пагинацией:
+                  value:
+                    count: 123
+                    next: http://api.example.org/accounts/?offset=400&limit=100
+                    previous: http://api.example.org/accounts/?offset=200&limit=100
+                    results:
+                      -
+                        id: 0
+                        author: string
+                        text: string
+                        pub_date: 2021-10-14T20:41:29.648Z
+                        image: string
+                        group: 0            
+          description: Удачное выполнение запроса без пагинации
       tags:
         - api
     post:
@@ -876,6 +874,32 @@ components:
           nullable: true
       required:
         - text
+    GetPost:
+      type: object
+      properties:
+        id:
+          type: integer
+          title: id публикации
+          readOnly: true
+        author:
+          type: string
+          title: username пользователя
+          readOnly: true
+        text:
+          type: string
+          title: текст публикации
+        pub_date:
+          type: string
+          format: date-time
+          readOnly: true
+        image:
+          type: string
+          format: binary
+          nullable: true
+        group:
+          type: integer
+          title: id сообщества
+          nullable: true
     Comment:
       type: object
       properties:
