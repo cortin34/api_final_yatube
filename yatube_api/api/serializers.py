@@ -1,23 +1,39 @@
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
 
-
-from posts.models import Comment, Post
+from posts.models import Comment, Group, Post
+from yatube_api.posts.models import Follow
 
 
 class PostSerializer(serializers.ModelSerializer):
-    author = SlugRelatedField(slug_field='username', read_only=True)
+    group = serializers.SlugRelatedField(queryset=Group.objects.all(),
+                                         slug_field='slug', required=False)
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True)
 
     class Meta:
-        fields = '__all__'
         model = Post
+        fields = ('__all__')
+        read_only_fields = ('author',)
+
+
+class GroupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Group
+        fields = ('__all__')
 
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        read_only=True, slug_field='username'
-    )
+        slug_field='username', read_only=True)
 
     class Meta:
-        fields = '__all__'
         model = Comment
+        fields = ('__all__')
+
+
+class FollowSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Follow
+        fields = ('__all__')
