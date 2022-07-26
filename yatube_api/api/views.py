@@ -1,17 +1,19 @@
-import django
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions
-from posts.models import Group, Post, Follow, Comment
-from rest_framework import filters
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from .permissions import IsAuthorOrReadOnlyPermission
-from rest_framework.validators import UniqueTogetherValidator
 
-from .serializers import CommentSerializer, FollowSerializer, GroupSerializer, PostSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+
+from posts.models import Follow, Group, Post
+
+from rest_framework import filters
+from rest_framework import permissions
+from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated
+
+from .permissions import IsAuthorOrReadOnlyPermission
+from .serializers import (CommentSerializer, FollowSerializer,
+                          GroupSerializer, PostSerializer)
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -73,7 +75,6 @@ class FollowViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.request.user.follower.all()
-
 
     def perform_create(self, serializer):
         serializer.is_valid(raise_exception=True)

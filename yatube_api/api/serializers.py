@@ -1,8 +1,8 @@
-from asyncore import read
-from typing_extensions import Required
+from posts.models import Comment, Follow, Group, Post, User
+
 from rest_framework import serializers
 
-from posts.models import Comment, Group, Post, Follow, User
+
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True)
@@ -31,20 +31,17 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class FollowSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(slug_field='username', read_only=True)
-        
     following = serializers.SlugRelatedField(queryset=User.objects.all(),
-        slug_field='username')
-
-
+                                             slug_field='username')
 
     def validate_user(self, author):
         user = self.context.get('request').user
         if user == author:
-            raise serializers.ValidationError(detail='Нельзя подписаться на самого себя')
+            raise serializers.ValidationError(
+                detail='Нельзя подписаться на самого себя'
+            )
         return author
-
 
     class Meta:
         model = Follow
         fields = ('user', 'following')
-
