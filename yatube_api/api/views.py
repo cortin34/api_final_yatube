@@ -1,20 +1,24 @@
+import django
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
-from posts.models import Group, Post
-
+from posts.models import Group, Post, Follow, Comment
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
-
-from yatube_api.api.permissions import IsAuthorOrReadOnlyPermission
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from .permissions import IsAuthorOrReadOnlyPermission
+from rest_framework.validators import UniqueTogetherValidator
 
 from .serializers import CommentSerializer, FollowSerializer, GroupSerializer, PostSerializer
+from rest_framework.pagination import LimitOffsetPagination
 
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = (IsAuthorOrReadOnlyPermission,)
+    pagination_class = LimitOffsetPagination
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -61,5 +65,16 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class FollowViewSet(viewsets.ModelViewSet):
+    queryset = Follow.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = FollowSerializer
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('following__username',)
+
+    def get_queryset(self):
+        return self.request.user.follower.all()
+
+
+    def perform_create(self, serializer):
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=self.request.user)

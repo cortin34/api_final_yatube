@@ -1,18 +1,15 @@
+from asyncore import read
+from typing_extensions import Required
 from rest_framework import serializers
 
-from posts.models import Comment, Group, Post
-from yatube_api.posts.models import Follow
-
-
+from posts.models import Comment, Group, Post, Follow, User
 class PostSerializer(serializers.ModelSerializer):
-    group = serializers.SlugRelatedField(queryset=Group.objects.all(),
-                                         slug_field='slug', required=False)
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True)
 
     class Meta:
         model = Post
-        fields = ('__all__')
+        fields = ('id', 'text', 'pub_date', 'author', 'image', 'group',)
         read_only_fields = ('author',)
 
 
@@ -20,7 +17,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ('__all__')
+        fields = ('title', 'slug', 'description')
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -33,7 +30,21 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(slug_field='username', read_only=True)
+        
+    following = serializers.SlugRelatedField(queryset=User.objects.all(),
+        slug_field='username')
+
+
+
+    def validate_user(self, author):
+        user = self.context.get('request').user
+        if user == author:
+            raise serializers.ValidationError(detail='Нельзя подписаться на самого себя')
+        return author
+
 
     class Meta:
         model = Follow
-        fields = ('__all__')
+        fields = ('user', 'following')
+
