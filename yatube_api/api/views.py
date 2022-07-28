@@ -1,12 +1,13 @@
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-from rest_framework import mixins
 
 from django_filters.rest_framework import DjangoFilterBackend
+
 
 from posts.models import Follow, Group, Post
 
 from rest_framework import filters
+from rest_framework import mixins
 from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
@@ -67,7 +68,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
-class FollowViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
+class FollowViewSet(mixins.CreateModelMixin, mixins.ListpyModelMixin,
                     viewsets.GenericViewSet):
     queryset = Follow.objects.all()
     permission_classes = (IsAuthenticated,)
