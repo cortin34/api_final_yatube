@@ -68,7 +68,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
-class FollowViewSet(mixins.CreateModelMixin, mixins.ListpyModelMixin,
+class FollowViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
                     viewsets.GenericViewSet):
     queryset = Follow.objects.all()
     permission_classes = (IsAuthenticated,)
